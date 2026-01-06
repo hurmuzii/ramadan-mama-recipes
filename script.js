@@ -4,41 +4,149 @@ const SUPABASE_URL = 'https://epzlgnvdquiifulgprox.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVwemxnbnZkcXVpaWZ1bGdwcm94Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3MTUxNjksImV4cCI6MjA4MzI5MTE2OX0.P8MnSSVb8agPffKJ_mlK3I5czTs7Rg0BbYWQIgJhE-Y';
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// 2. تعريف العناصر من الـ HTML
+// 2. تعريف العناصر
 const recipeForm = document.getElementById('recipeForm');
 const recipeGrid = document.getElementById('recipeGrid');
 const modal = document.getElementById('recipeModal');
-const toggleFormBtn = document.getElementById('toggleFormBtn'); // هذا السطر الذي كان ناقصاً
+const toggleFormBtn = document.getElementById('toggleFormBtn');
+const adminLoginBtn = document.getElementById('adminLoginBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+const closeBtn = document.querySelector('.close-btn');
 
 let allRecipes = [];
+let userSession = null;
 let editingRecipeId = null;
 
-// 3. وظيفة زر "إضافة وصفة جديدة +" (إظهار وإخفاء الفورم)
-if (toggleFormBtn) {
-    toggleFormBtn.addEventListener('click', () => {
-        editingRecipeId = null; 
-        recipeForm.reset();
-        recipeForm.querySelector('button').innerText = "حفظ الأكلة ✨";
-        recipeForm.classList.toggle('hidden'); // يظهر الفورم أو يخفيه
+// 3. فحص الجلسة (هل ماما مسجلة دخولها؟)
+async function checkUser() {
+    const { data } = await _supabase.auth.getSession();
+    userSession = data.session;
+    
+    // التحكم في ظهور أزرار الإدارة في الصفحة الرئيسية
+    if (userSession) {
+        if (toggleFormBtn) toggleFormBtn.classList.remove('hidden');
+        if (logoutBtn) logoutBtn.classList.remove('hidden');
+        if (adminLoginBtn) adminLoginBtn.classList.add('hidden');
+    } else {
+        if (toggleFormBtn) toggleFormBtn.classList.add('hidden');
+        if (logoutBtn) logoutBtn.classList.add('hidden');
+        if (adminLoginBtn) adminLoginBtn.classList.remove('hidden');
+    }
+}
+
+// 4. تسجيل الدخول والخروج
+if (adminLoginBtn) {
+    adminLoginBtn.addEventListener('click', async () => {
+        const email = prompt("أدخلي البريد الإلكتروني:");
+        const password = prompt("أدخلي كلمة السر:");
+        if (email && password) {
+            const { error } = await _supabase.auth.signInWithPassword({ email, password });
+            if (error) alert("خطأ: " + error.message);
+            else location.reload();
+        }
     });
 }
 
-// 4. جلب البيانات من Supabase
+if (logoutBtn) {
+    logoutBtn.addEventListener('click', async () => {
+        await _supabase.auth.signOut();
+        location.reload();
+    });
+}
+
+// 5. فتح وإغلاق الفورم (Add Recipe)
+if (toggleFormBtn) {
+    toggleFormBtn.addEventListener('click', () => {
+        editingRecipeId = null;
+        recipeForm.reset();
+        recipeForm.querySelector('button').innerText = "حفظ الأكلة ✨";
+        recipeForm.classList.toggle('hidden');
+        recipeForm.classList.remove('edit-mode-active');
+    });
+}
+
+// 6. جلب الأكلات وعرضها
 async function fetchRecipes() {
     try {
         const { data, error } = await _supabase.from('recipes').select('*');
         if (error) throw error;
         allRecipes = data;
         renderRecipes(data);
-    } catch (err) { console.error('خطأ في الجلب:', err.message); }
+    } catch (err) { console.error(err.message); }
 }
 
-// 5. إضافة أكلة جديدة أو تحديثها
+function renderRecipes(data) {
+    recipeGrid.innerHTML = '';
+    data.forEach(recipe => {
+        const card = document.createElement('div');
+        card.className = 'recipe-card';
+        card.onclick = () => openModal(recipe);
+        card.innerHTML = `
+            <img src="${recipe.image_url}" onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
+            <div class="recipe-info">
+                <span class="category-tag">${recipe.category}</span>
+                <h3>${recipe.name}</h3>
+            </div>
+        `;
+        recipeGrid.appendChild(card);
+    });
+}
+
+// 7. نافذة التفاصيل (المودال) - حل مشكلة الأزرار والإغلاق
+function openModal(recipe) {
+    document.getElementById('modalImg').src = recipe.image_url;
+    document.getElementById('modalName').innerText = recipe.name;
+    document.getElementById('modalIngredients').innerText = recipe.ingredients;
+    document.getElementById('modalMethod').innerText = recipe.method;
+    
+    const footer = document.querySelector('.modal-footer');
+    // إظهار أزرار التحكم فقط إذا كانت ماما مسجلة دخولها
+    if (footer) footer.style.display = userSession ? "flex" : "none";
+
+    modal.style.display = "block";
+
+    // زر الحذف
+    document.getElementById('deleteBtn').onclick = async () => {
+        if (confirm("هل أنت متأكد من حذف هذه الوصفة؟")) {
+            const { error } = await _supabase.from('recipes').delete().eq('id', recipe.id);
+            if (!error) {
+                modal.style.display = "none";
+                fetchRecipes();
+            } else { alert("حدث خطأ في الحذف"); }
+        }
+    };
+
+    // زر التعديل
+    document.getElementById('editBtn').onclick = () => {
+        modal.style.display = "none";
+        editingRecipeId = recipe.id;
+        
+        // تعبئة الفورم بالبيانات القديمة
+        document.getElementById('recipeName').value = recipe.name;
+        document.getElementById('recipeImg').value = recipe.image_url;
+        document.getElementById('recipeCategory').value = recipe.category;
+        document.getElementById('recipeIngredients').value = recipe.ingredients;
+        document.getElementById('recipeMethod').value = recipe.method;
+        
+        recipeForm.querySelector('button').innerText = "تحديث الوصفة 🔄";
+        recipeForm.classList.remove('hidden');
+        recipeForm.classList.add('edit-mode-active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+}
+
+// 8. حل مشكلة إغلاق المودال
+if (closeBtn) {
+    closeBtn.onclick = () => { modal.style.display = "none"; };
+}
+window.onclick = (e) => { 
+    if (e.target == modal) modal.style.display = "none"; 
+};
+
+// 9. إضافة أو تحديث الوصفة في السيرفر
 recipeForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const password = prompt("الرمز السري مطلوب:");
-    if (password !== "22694") return alert("الرمز خاطئ!");
-
+    
     const recipeData = {
         name: document.getElementById('recipeName').value,
         image_url: document.getElementById('recipeImg').value,
@@ -48,16 +156,18 @@ recipeForm.addEventListener('submit', async (e) => {
     };
 
     try {
+        let error;
         if (editingRecipeId) {
-            const { error } = await _supabase.from('recipes').update(recipeData).eq('id', editingRecipeId);
-            if (error) throw error;
-            alert("تم التعديل بنجاح!");
+            const result = await _supabase.from('recipes').update(recipeData).eq('id', editingRecipeId);
+            error = result.error;
         } else {
-            const { error } = await _supabase.from('recipes').insert([recipeData]);
-            if (error) throw error;
-            alert("تمت الإضافة بنجاح!");
+            const result = await _supabase.from('recipes').insert([recipeData]);
+            error = result.error;
         }
+
+        if (error) throw error;
         
+        alert(editingRecipeId ? "تم التحديث!" : "تمت الإضافة!");
         recipeForm.reset();
         recipeForm.classList.add('hidden');
         editingRecipeId = null;
@@ -65,65 +175,11 @@ recipeForm.addEventListener('submit', async (e) => {
     } catch (err) { alert("خطأ: " + err.message); }
 });
 
-// 6. عرض البطاقات في الصفحة
-function renderRecipes(data) {
-    recipeGrid.innerHTML = '';
-    data.forEach(recipe => {
-        const card = document.createElement('div');
-        card.className = 'recipe-card';
-        card.onclick = () => openModal(recipe);
-        card.innerHTML = `
-            <img src="${recipe.image_url}" onerror="this.src='https://via.placeholder.com/300x200?text=صورة+مفقودة'">
-            <div class="recipe-info">
-                <span class="category-tag">${recipe.category}</span>
-                <h3>${recipe.name}</h3>
-                <p style="color: #888; font-size: 12px;">اضغط للتفاصيل</p>
-            </div>
-        `;
-        recipeGrid.appendChild(card);
-    });
-}
+// 10. الفلترة
+window.filterRecipes = (cat) => {
+    renderRecipes(cat === 'الكل' ? allRecipes : allRecipes.filter(r => r.category === cat));
+};
 
-// 7. نافذة التفاصيل (الحذف والتعديل)
-function openModal(recipe) {
-    document.getElementById('modalImg').src = recipe.image_url;
-    document.getElementById('modalName').innerText = recipe.name;
-    document.getElementById('modalIngredients').innerText = recipe.ingredients;
-    document.getElementById('modalMethod').innerText = recipe.method;
-    modal.style.display = "block";
-
-    document.getElementById('deleteBtn').onclick = async () => {
-        const password = prompt("رمز الحذف:");
-        if (password === "22694") {
-            const { error } = await _supabase.from('recipes').delete().eq('id', recipe.id);
-            if (!error) {
-                modal.style.display = "none";
-                fetchRecipes();
-            }
-        }
-    };
-
-    document.getElementById('editBtn').onclick = () => {
-        modal.style.display = "none";
-        editingRecipeId = recipe.id;
-        document.getElementById('recipeName').value = recipe.name;
-        document.getElementById('recipeImg').value = recipe.image_url;
-        document.getElementById('recipeCategory').value = recipe.category;
-        document.getElementById('recipeIngredients').value = recipe.ingredients;
-        document.getElementById('recipeMethod').value = recipe.method;
-        recipeForm.querySelector('button').innerText = "تحديث الوصفة";
-        recipeForm.classList.remove('hidden');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-}
-
-// 8. إغلاق النافذة والفلترة
-const closeBtn = document.querySelector('.close-btn');
-if (closeBtn) closeBtn.onclick = () => modal.style.display = "none";
-
-window.onclick = (e) => { if (e.target == modal) modal.style.display = "none"; }
-
-window.filterRecipes = (cat) => renderRecipes(cat === 'الكل' ? allRecipes : allRecipes.filter(r => r.category === cat));
-
-// تشغيل الجلب عند التحميل
+// تشغيل عند التحميل
+checkUser();
 fetchRecipes();
