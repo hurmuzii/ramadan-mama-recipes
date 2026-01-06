@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>رمضان ماما - وصفاتك الرمضانية</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <header>
+        <h1>🌙 رمضان ماما</h1>
+        <p>وصفاتكِ الشهية في مكان واحد</p>
+    </header>
+
+    <main>
+        <section class="recipe-form-section">
+            <button id="toggleFormBtn">إضافة وصفة جديدة +</button>
+            <form id="recipeForm" class="hidden">
+                <input type="text" id="recipeName" placeholder="اسم الأكلة" required>
+                <input type="text" id="recipeImg" placeholder="رابط صورة الأكلة (URL)" required>
+                <select id="recipeCategory">
+                    <option value="اكلة رئيسية">أكلة رئيسية</option>
+                    <option value="حلويات">حلويات</option>
+                    <option value="مقبلات">مقبلات</option>
+                    <option value="مشروبات">مشروبات</option>
+                </select>
+                <textarea id="recipeIngredients" placeholder="المكونات" required></textarea>
+                <textarea id="recipeMethod" placeholder="طريقة التحضير" required></textarea>
+                <button type="submit">حفظ الأكلة ✨</button>
+            </form>
+        </section>
+
+        <section class="filters">
+            <button onclick="filterRecipes('الكل')">الكل</button>
+            <button onclick="filterRecipes('اكلة رئيسية')">أطباق رئيسية</button>
+            <button onclick="filterRecipes('حلويات')">حلويات</button>
+            <button onclick="filterRecipes('مقبلات')">مقبلات</button>
+        </section>
+
+        <section id="recipeGrid" class="recipe-grid">
+            </section>
+    </main>
+
+    
+<div id="recipeModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        
+        <img id="modalImg" src="" alt="">
+        <h2 id="modalName"></h2>
+        
+        <div class="modal-body">
+            <h4>المكونات:</h4>
+            <p id="modalIngredients"></p>
+            <hr>
+            <h4>طريقة التحضير:</h4>
+            <p id="modalMethod"></p>
+        </div>
+
+        <div class="modal-footer">
+            <button id="editBtn" class="edit-btn">تعديل الوصفة ✏️</button>
+            <button id="deleteBtn" class="delete-btn">حذف الوصفة 🗑️</button>
+        </div>
+    </div>
+</div>
+<script src="script.js"></script>
+</body>
+</html>
