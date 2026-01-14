@@ -23,59 +23,53 @@ const magicParseBtn = document.getElementById('magicParseBtn');
 const magicParserSection = document.getElementById('magicParserSection');
 // 2. دالة استخراج البيانات من النص
 magicParseBtn.addEventListener('click', () => {
-    const text = magicPasteArea.value;
+    let text = magicPasteArea.value;
     if (!text) return alert("الرجاء لصق نص أولاً!");
 
-    // استخراج اسم الأكلة
-    const nameMatch = text.match(/اسم الأكلة:\s*(.*)/);
-    const recipeName = nameMatch ? nameMatch[1].trim() : "";
+    // دالة مساعدة لتنظيف النص من النجوم والخطوط الزائدة
+    const clean = (str) => str ? str.replace(/\*\*|---|__/g, '').trim() : "";
 
-    // استخراج المكونات (يأخذ كل ما بين المكونات وطريقة التحضير)
-    const ingredientsMatch = text.match(/المكونات والمقادير:([\s\S]*?)طريقة التحضير:/);
-    const ingredients = ingredientsMatch ? ingredientsMatch[1].trim() : "";
+    // 1. استخراج اسم الأكلة (يدعم: اسم الأكلة، اسم الطبخة، اسم الطبق، الوصفة)
+    const nameMatch = text.match(/(?:اسم الأكلة|اسم الطبخة|اسم الطبق|الوصفة)[:：]\s*(.*)/i);
+    const recipeName = nameMatch ? clean(nameMatch[1]) : "";
 
-    // استخراج الطريقة (يأخذ كل ما بين طريقة التحضير ونصيحة الشيف أو رابط الفيديو)
-    const methodMatch = text.match(/طريقة التحضير:([\s\S]*?)(?=نصيحة الشيف|رابط فيديو|$)/);
-    let method = methodMatch ? methodMatch[1].trim() : "";
+    // 2. استخراج المكونات (يبحث عما بين كلمة المكونات وكلمة طريقة التحضير)
+    const ingredientsMatch = text.match(/(?:المكونات والمقادير|المكونات|المقادير)[:：]([\s\S]*?)(?=طريقة التحضير|التحضير:)/i);
+    const ingredients = ingredientsMatch ? clean(ingredientsMatch[1]) : "";
 
-    // استخراج رابط الفيديو
+    // 3. استخراج الطريقة (يبحث عما بعد كلمة طريقة التحضير)
+    const methodMatch = text.match(/(?:طريقة التحضير|التحضير)[:：]([\s\S]*?)(?=نصيحة|رابط فيديو|بالهناء|$)/i);
+    let method = methodMatch ? clean(methodMatch[1]) : "";
+
+    // 4. استخراج رابط الفيديو
     const videoMatch = text.match(/(https?:\/\/[^\s]+)/g);
-    const videoUrl = videoMatch ? videoMatch.find(url => url.includes('tiktok') || url.includes('instagram') || url.includes('fb')) : "";
+    const videoUrl = videoMatch ? videoMatch.find(url => url.includes('tiktok') || url.includes('instagram') || url.includes('fb') || url.includes('vt.')) : "";
 
-    // إضافة رابط الفيديو في نهاية طريقة التحضير بشكل جميل
     if (videoUrl) {
-        method += `\n\n📺 رابط فيديو الوصفة: ${videoUrl}`;
+        method += `\n\n📺 رابط الفيديو: ${videoUrl}`;
     }
 
-    // تعبئة الحقول في الفورم تلقائياً
+    // تعبئة الحقول
     document.getElementById('recipeName').value = recipeName;
     document.getElementById('recipeIngredients').value = ingredients;
     document.getElementById('recipeMethod').value = method;
     
-    // محاولة جلب صورة مصغرة إذا كان تيك توك
+    // جلب الصورة إذا كان الرابط تيك توك
     if (videoUrl && videoUrl.includes('tiktok')) {
         getTikTokThumbnail(videoUrl);
+    } else if (videoUrl) {
+        document.getElementById('recipeImg').value = videoUrl;
+    }
+
+    // تنبيه بسيط
+    if (recipeName) {
+        alert(`تم التعرف على "${recipeName}" بنجاح! ✨`);
+        recipeForm.classList.remove('hidden');
     } else {
-        document.getElementById('recipeImg').value = videoUrl; // نضع الرابط مؤقتاً في خانة الصورة
+        alert("تم التحليل، لكن لم أستطع تحديد اسم الأكلة بدقة. يرجى التأكد من الحقول.");
+        recipeForm.classList.remove('hidden');
     }
-
-    // إظهار الفورم إذا كان مخفياً
-    recipeForm.classList.remove('hidden');
-    alert("تم تحليل الوصفة وتعبئتها! تأكد من البيانات قبل الحفظ.");
 });
-
-// 3. دالة جلب صورة مصغرة من تيك توك (باستخدام oEmbed)
-async function getTikTokThumbnail(url) {
-    try {
-        const response = await fetch(`https://www.tiktok.com/oembed?url=${url}`);
-        const data = await response.json();
-        if (data.thumbnail_url) {
-            document.getElementById('recipeImg').value = data.thumbnail_url;
-        }
-    } catch (e) {
-        console.log("تعذر جلب صورة التيك توك تلقائياً");
-    }
-}
 // 3. فحص الجلسة (هل ماما مسجلة دخولها؟)
 async function checkUser() {
     const { data } = await _supabase.auth.getSession();
