@@ -26,49 +26,40 @@ magicParseBtn.addEventListener('click', () => {
     let text = magicPasteArea.value;
     if (!text) return alert("الرجاء لصق نص أولاً!");
 
-    // دالة مساعدة لتنظيف النص من النجوم والخطوط الزائدة
     const clean = (str) => str ? str.replace(/\*\*|---|__/g, '').trim() : "";
 
-    // 1. استخراج اسم الأكلة (يدعم: اسم الأكلة، اسم الطبخة، اسم الطبق، الوصفة)
+    // [جديد] البحث عن أي رابط ينتهي بامتداد صورة
+    const imageRegex = /(https?:\/\/[^\s]+(?:\.jpg|\.jpeg|\.png|\.webp)(?:\?[^\s]*)?)/i;
+    const imageMatch = text.match(imageRegex);
+    const foundImageUrl = imageMatch ? imageMatch[0] : "";
+
+    // استخراج باقي البيانات (الاسم، المكونات، الطريقة) كما فعلنا سابقاً
     const nameMatch = text.match(/(?:اسم الأكلة|اسم الطبخة|اسم الطبق|الوصفة)[:：]\s*(.*)/i);
     const recipeName = nameMatch ? clean(nameMatch[1]) : "";
 
-    // 2. استخراج المكونات (يبحث عما بين كلمة المكونات وكلمة طريقة التحضير)
     const ingredientsMatch = text.match(/(?:المكونات والمقادير|المكونات|المقادير)[:：]([\s\S]*?)(?=طريقة التحضير|التحضير:)/i);
     const ingredients = ingredientsMatch ? clean(ingredientsMatch[1]) : "";
 
-    // 3. استخراج الطريقة (يبحث عما بعد كلمة طريقة التحضير)
     const methodMatch = text.match(/(?:طريقة التحضير|التحضير)[:：]([\s\S]*?)(?=نصيحة|رابط فيديو|بالهناء|$)/i);
     let method = methodMatch ? clean(methodMatch[1]) : "";
 
-    // 4. استخراج رابط الفيديو
     const videoMatch = text.match(/(https?:\/\/[^\s]+)/g);
     const videoUrl = videoMatch ? videoMatch.find(url => url.includes('tiktok') || url.includes('instagram') || url.includes('fb') || url.includes('vt.')) : "";
-
-    if (videoUrl) {
-        method += `\n\n📺 رابط الفيديو: ${videoUrl}`;
-    }
 
     // تعبئة الحقول
     document.getElementById('recipeName').value = recipeName;
     document.getElementById('recipeIngredients').value = ingredients;
-    document.getElementById('recipeMethod').value = method;
+    document.getElementById('recipeMethod').value = method + (videoUrl ? `\n\n📺 فيديو الوصفة: ${videoUrl}` : "");
     
-    // جلب الصورة إذا كان الرابط تيك توك
-    if (videoUrl && videoUrl.includes('tiktok')) {
+    // [جديد] إذا وجدنا رابط صورة مباشر نضعه فوراً، وإلا نبحث عن تيك توك
+    if (foundImageUrl) {
+        document.getElementById('recipeImg').value = foundImageUrl;
+    } else if (videoUrl && videoUrl.includes('tiktok')) {
         getTikTokThumbnail(videoUrl);
-    } else if (videoUrl) {
-        document.getElementById('recipeImg').value = videoUrl;
     }
 
-    // تنبيه بسيط
-    if (recipeName) {
-        alert(`تم التعرف على "${recipeName}" بنجاح! ✨`);
-        recipeForm.classList.remove('hidden');
-    } else {
-        alert("تم التحليل، لكن لم أستطع تحديد اسم الأكلة بدقة. يرجى التأكد من الحقول.");
-        recipeForm.classList.remove('hidden');
-    }
+    recipeForm.classList.remove('hidden');
+    alert("تم التحليل وتعبئة البيانات! ✨");
 });
 // 3. فحص الجلسة (هل ماما مسجلة دخولها؟)
 async function checkUser() {
@@ -223,8 +214,13 @@ recipeForm.addEventListener('submit', async (e) => {
 
         if (error) throw error;
         
-        alert(editingRecipeId ? "تم التحديث!" : "تمت الإضافة!");
-        recipeForm.reset();
+        alert("تم الحفظ بنجاح!");
+
+        // --- التعديل هنا ---
+        recipeForm.reset(); // مسح فورم الإدخال
+        if (magicPasteArea) magicPasteArea.value = ''; // مسح صندوق اللصق السحري
+        // ------------------
+
         recipeForm.classList.add('hidden');
         editingRecipeId = null;
         fetchRecipes();
