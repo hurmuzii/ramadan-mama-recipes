@@ -18,7 +18,12 @@
     <main>
         <section class="recipe-form-section">
             <button id="toggleFormBtn">إضافة وصفة جديدة +</button>
-            <form id="recipeForm" class="hidden">
+            <section id="magicParserSection" class="magic-parser hidden" style="background: #fff9e6; padding: 15px; border-radius: 15px; margin-bottom: 20px; border: 2px dashed var(--accent-color);">
+    <h3 style="margin-top:0">🪄 لصق الوصفة الذكي</h3>
+    <textarea id="magicPasteArea" placeholder="ألحق النص الطويل هنا... وسأقوم بترتيبه لك!" style="width: 100%; height: 100px; margin-bottom: 10px;"></textarea>
+    <button id="magicParseBtn" style="background: var(--primary-color); width: 100%;">تحليل وتعبئة الوصفة ✨</button>
+</section>
+<form id="recipeForm" class="hidden">
                 <input type="text" id="recipeName" placeholder="اسم الأكلة" required>
                 <input type="text" id="recipeImg" placeholder="رابط صورة الأكلة (URL)" required>
                 <select id="recipeCategory">

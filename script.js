@@ -17,19 +17,81 @@ let allRecipes = [];
 let userSession = null;
 let editingRecipeId = null;
 
+// 1. ربط العناصر الجديدة
+const magicPasteArea = document.getElementById('magicPasteArea');
+const magicParseBtn = document.getElementById('magicParseBtn');
+const magicParserSection = document.getElementById('magicParserSection');
+// 2. دالة استخراج البيانات من النص
+magicParseBtn.addEventListener('click', () => {
+    const text = magicPasteArea.value;
+    if (!text) return alert("الرجاء لصق نص أولاً!");
+
+    // استخراج اسم الأكلة
+    const nameMatch = text.match(/اسم الأكلة:\s*(.*)/);
+    const recipeName = nameMatch ? nameMatch[1].trim() : "";
+
+    // استخراج المكونات (يأخذ كل ما بين المكونات وطريقة التحضير)
+    const ingredientsMatch = text.match(/المكونات والمقادير:([\s\S]*?)طريقة التحضير:/);
+    const ingredients = ingredientsMatch ? ingredientsMatch[1].trim() : "";
+
+    // استخراج الطريقة (يأخذ كل ما بين طريقة التحضير ونصيحة الشيف أو رابط الفيديو)
+    const methodMatch = text.match(/طريقة التحضير:([\s\S]*?)(?=نصيحة الشيف|رابط فيديو|$)/);
+    let method = methodMatch ? methodMatch[1].trim() : "";
+
+    // استخراج رابط الفيديو
+    const videoMatch = text.match(/(https?:\/\/[^\s]+)/g);
+    const videoUrl = videoMatch ? videoMatch.find(url => url.includes('tiktok') || url.includes('instagram') || url.includes('fb')) : "";
+
+    // إضافة رابط الفيديو في نهاية طريقة التحضير بشكل جميل
+    if (videoUrl) {
+        method += `\n\n📺 رابط فيديو الوصفة: ${videoUrl}`;
+    }
+
+    // تعبئة الحقول في الفورم تلقائياً
+    document.getElementById('recipeName').value = recipeName;
+    document.getElementById('recipeIngredients').value = ingredients;
+    document.getElementById('recipeMethod').value = method;
+    
+    // محاولة جلب صورة مصغرة إذا كان تيك توك
+    if (videoUrl && videoUrl.includes('tiktok')) {
+        getTikTokThumbnail(videoUrl);
+    } else {
+        document.getElementById('recipeImg').value = videoUrl; // نضع الرابط مؤقتاً في خانة الصورة
+    }
+
+    // إظهار الفورم إذا كان مخفياً
+    recipeForm.classList.remove('hidden');
+    alert("تم تحليل الوصفة وتعبئتها! تأكد من البيانات قبل الحفظ.");
+});
+
+// 3. دالة جلب صورة مصغرة من تيك توك (باستخدام oEmbed)
+async function getTikTokThumbnail(url) {
+    try {
+        const response = await fetch(`https://www.tiktok.com/oembed?url=${url}`);
+        const data = await response.json();
+        if (data.thumbnail_url) {
+            document.getElementById('recipeImg').value = data.thumbnail_url;
+        }
+    } catch (e) {
+        console.log("تعذر جلب صورة التيك توك تلقائياً");
+    }
+}
 // 3. فحص الجلسة (هل ماما مسجلة دخولها؟)
 async function checkUser() {
     const { data } = await _supabase.auth.getSession();
     userSession = data.session;
     
-    // التحكم في ظهور أزرار الإدارة في الصفحة الرئيسية
     if (userSession) {
+        // إذا سجلت ماما دخولها: تظهر كل أدوات التحكم
         if (toggleFormBtn) toggleFormBtn.classList.remove('hidden');
         if (logoutBtn) logoutBtn.classList.remove('hidden');
+        if (magicParserSection) magicParserSection.classList.remove('hidden'); // إظهار أداة اللصق
         if (adminLoginBtn) adminLoginBtn.classList.add('hidden');
     } else {
+        // إذا كان زائراً: تختفي كل أدوات التحكم
         if (toggleFormBtn) toggleFormBtn.classList.add('hidden');
         if (logoutBtn) logoutBtn.classList.add('hidden');
+        if (magicParserSection) magicParserSection.classList.add('hidden'); // إخفاء أداة اللصق
         if (adminLoginBtn) adminLoginBtn.classList.remove('hidden');
     }
 }
