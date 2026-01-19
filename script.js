@@ -157,7 +157,9 @@ function openModal(recipe) {
     document.getElementById('modalImg').src = recipe.image_url;
     document.getElementById('modalName').innerText = recipe.name;
     document.getElementById('modalIngredients').innerText = recipe.ingredients;
-    document.getElementById('modalMethod').innerText = recipe.method;
+    
+    // التعديل هنا: غيرنا innerText إلى innerHTML واستخدمنا دالة linkify
+    document.getElementById('modalMethod').innerHTML = linkify(recipe.method);
     
     const footer = document.querySelector('.modal-footer');
     // إظهار أزرار التحكم فقط إذا كانت ماما مسجلة دخولها
@@ -193,6 +195,13 @@ function openModal(recipe) {
         recipeForm.classList.add('edit-mode-active');
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
+}
+// دالة لتحويل النصوص التي تحتوي على روابط إلى روابط قابلة للضغط
+function linkify(text) {
+    const urlPattern = /(https?:\/\/[^\s]+)/g;
+    return text.replace(urlPattern, function(url) {
+        return `<a href="${url}" target="_blank" class="video-link">🔗 اضغط هنا لمشاهدة الفيديو</a>`;
+    });
 }
 
 // 8. حل مشكلة إغلاق المودال
