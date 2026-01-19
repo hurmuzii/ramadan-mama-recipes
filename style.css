@@ -110,7 +110,10 @@ button:hover { opacity: 0.8; }
     background-color: rgba(0,0,0,0.7);
     backdrop-filter: blur(5px);
 }
-
+#modalMethod, #modalIngredients {
+    line-height: 1.6; /* لإعطاء مسافة عمودية مريحة بين الأسطر */
+    margin-top: 10px;
+}
 .modal-content {
     background-color: #fff;
     margin: 5% auto;

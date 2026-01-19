@@ -25,7 +25,7 @@ const magicParserSection = document.getElementById('magicParserSection');
 magicParseBtn.addEventListener('click', () => {
     let text = magicPasteArea.value;
     if (!text) return alert("الرجاء لصق نص أولاً!");
-
+text = text.replace(/This message was sent automatically with n8n/gi, '');
     // دالة التنظيف الأساسية (النجوم والخطوط)
     const clean = (str) => str ? str.replace(/\*\*|---|__/g, '').trim() : "";
 
@@ -156,9 +156,11 @@ function renderRecipes(data) {
 function openModal(recipe) {
     document.getElementById('modalImg').src = recipe.image_url;
     document.getElementById('modalName').innerText = recipe.name;
-    document.getElementById('modalIngredients').innerText = recipe.ingredients;
-    
-    // التعديل هنا: غيرنا innerText إلى innerHTML واستخدمنا دالة linkify
+
+    // [جديد] المكونات الآن تدعم التنسيق والروابط
+    document.getElementById('modalIngredients').innerHTML = linkify(recipe.ingredients);
+
+    // طريقة التحضير تدعم التنسيق والروابط
     document.getElementById('modalMethod').innerHTML = linkify(recipe.method);
     
     const footer = document.querySelector('.modal-footer');
@@ -198,10 +200,27 @@ function openModal(recipe) {
 }
 // دالة لتحويل النصوص التي تحتوي على روابط إلى روابط قابلة للضغط
 function linkify(text) {
+    if (!text) return "";
+
+    // 1. تنظيف النص من أي فراغات زائدة في البداية والنهاية
+    let cleanedText = text.trim();
+
+    // 2. تحويل الروابط إلى أزرار
     const urlPattern = /(https?:\/\/[^\s]+)/g;
-    return text.replace(urlPattern, function(url) {
+    cleanedText = cleanedText.replace(urlPattern, function(url) {
         return `<a href="${url}" target="_blank" class="video-link">🔗 اضغط هنا لمشاهدة الفيديو</a>`;
     });
+
+    // 3. جعل الكلمات التي في بداية السطر وتنتهي بـ (:) غامقة (مثل "تحضير البسكويت:")
+    // وأيضاً العناوين التي تبدأ برقم أو علامة *
+    cleanedText = cleanedText.split('\n').map(line => {
+        // إذا كان السطر يبدأ بنقطة أو رقم متبوعاً بنقطتين، نجعله غامقاً
+        return line.replace(/^([\u0600-\u06FF\s]+[:：])/, '<b>$1</b>') // للعناوين العربية
+                   .replace(/^(\d+\.|[*•-])\s*(.*?[:：])/, '$1 <b>$2</b>'); // للنقاط المرقمة
+    }).join('\n');
+
+    // 4. تحويل الأسطر الجديدة إلى <br>
+    return cleanedText.replace(/\n/g, '<br>');
 }
 
 // 8. حل مشكلة إغلاق المودال
