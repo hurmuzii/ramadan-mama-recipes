@@ -207,3 +207,62 @@ button:hover { opacity: 0.8; }
     cursor: pointer;
     font-family: inherit;
 }
+.controls-section {
+    display: flex;
+    gap: 10px;
+    margin: 15px auto;
+    max-width: 1000px; /* ليظل متناسقاً في الشاشات الكبيرة */
+    padding: 0 15px;
+    box-sizing: border-box;
+}
+
+.search-wrapper {
+    flex: 2; /* شريط البحث يأخذ مساحة أكبر */
+    position: relative;
+}
+
+.search-wrapper input {
+    width: 100%;
+    padding: 12px 40px 12px 12px; /* مساحة للأيقونة */
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    font-size: 14px;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.search-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+    pointer-events: none;
+}
+
+.sort-wrapper {
+    flex: 1; /* قائمة الترتيب تأخذ مساحة أصغر */
+}
+
+.sort-wrapper select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    background-color: white;
+    font-size: 14px;
+    cursor: pointer;
+    box-sizing: border-box;
+    appearance: none; /* إخفاء سهم المتصفح الافتراضي في بعض الأجهزة */
+}
+
+/* شاشة الموبايل الصغيرة جداً */
+@media (max-width: 480px) {
+    .controls-section {
+        flex-direction: column; /* وضعهم فوق بعض إذا كانت الشاشة ضيقة جداً */
+    }
+    
+    .search-wrapper, .sort-wrapper {
+        width: 100%;
+    }
+}

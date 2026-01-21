@@ -32,17 +32,16 @@
         تحليل وتعبئة البيانات ✨
     </button>
 </section>
-<section class="controls-section" style="margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 10px;">
-    <div class="search-box" style="flex: 2; min-width: 200px;">
-        <input type="text" id="searchInput" placeholder="بحث عن أكلة أو مكون..." 
-            style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; outline: none;">
+<section class="controls-section">
+    <div class="search-wrapper">
+        <input type="text" id="searchInput" placeholder="بحث عن أكلة أو مكون...">
+        <i class="search-icon">🔍</i>
     </div>
-
-    <div class="sort-box" style="flex: 1; min-width: 150px;">
-        <select id="sortSelect" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; background: white;">
-            <option value="newest">الأحدث أولاً</option>
-            <option value="oldest">الأقدم أولاً</option>
-            <option value="alphabetical">أبجدياً (أ-ي)</option>
+    <div class="sort-wrapper">
+        <select id="sortSelect">
+            <option value="newest">الأحدث</option>
+            <option value="oldest">الأقدم</option>
+            <option value="alphabetical">أبجدياً</option>
         </select>
     </div>
 </section>
