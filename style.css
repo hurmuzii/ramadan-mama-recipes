@@ -192,3 +192,18 @@ button:hover { opacity: 0.8; }
     color: white;
     transform: scale(1.05);
 }
+
+.controls-section {
+    padding: 0 10px;
+}
+
+#searchInput:focus {
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 8px rgba(230, 126, 34, 0.1);
+}
+
+/* تحسين شكل السلكت على الموبايل */
+#sortSelect {
+    cursor: pointer;
+    font-family: inherit;
+}

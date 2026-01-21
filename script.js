@@ -13,6 +13,10 @@ const adminLoginBtn = document.getElementById('adminLoginBtn');
 const logoutBtn = document.getElementById('logoutBtn');
 const closeBtn = document.querySelector('.close-btn');
 
+const searchInput = document.getElementById('searchInput');
+const sortSelect = document.getElementById('sortSelect');
+let currentCategory = 'الكل'; // لتذكر الفئة المختارة حالياً
+
 let allRecipes = [];
 let userSession = null;
 let editingRecipeId = null;
@@ -269,8 +273,46 @@ recipeForm.addEventListener('submit', async (e) => {
 });
 
 // 10. الفلترة
+// دالة شاملة لتصفية وترتيب وعرض الوصفات
+function updateDisplay() {
+    let filtered = [...allRecipes]; // نسخة من كل الوصفات
+
+    // 1. التصفية حسب الفئة
+    if (currentCategory !== 'الكل') {
+        filtered = filtered.filter(r => r.category === currentCategory);
+    }
+
+    // 2. التصفية حسب البحث (الاسم أو المكونات)
+    const searchTerm = searchInput.value.toLowerCase();
+    if (searchTerm) {
+        filtered = filtered.filter(r => 
+            r.name.toLowerCase().includes(searchTerm) || 
+            r.ingredients.toLowerCase().includes(searchTerm)
+        );
+    }
+
+    // 3. الترتيب
+    const sortValue = sortSelect.value;
+    if (sortValue === 'newest') {
+        filtered.sort((a, b) => b.id - a.id); // يفترض أن ID الأكبر هو الأحدث
+    } else if (sortValue === 'oldest') {
+        filtered.sort((a, b) => a.id - b.id);
+    } else if (sortValue === 'alphabetical') {
+        filtered.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
+    }
+
+    renderRecipes(filtered);
+}
+
+// 4. مراقبة الأحداث (Events)
+searchInput.addEventListener('input', updateDisplay);
+sortSelect.addEventListener('change', updateDisplay);
+
+// تحديث دالة الفئة لتعمل مع النظام الجديد
 window.filterRecipes = (cat) => {
-    renderRecipes(cat === 'الكل' ? allRecipes : allRecipes.filter(r => r.category === cat));
+    currentCategory = cat;
+    // تحديث شكل الأزرار (اختياري: لإضافة فئة نشطة)
+    updateDisplay();
 };
 
 // تشغيل عند التحميل

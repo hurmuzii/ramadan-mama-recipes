@@ -32,6 +32,20 @@
         تحليل وتعبئة البيانات ✨
     </button>
 </section>
+<section class="controls-section" style="margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 10px;">
+    <div class="search-box" style="flex: 2; min-width: 200px;">
+        <input type="text" id="searchInput" placeholder="بحث عن أكلة أو مكون..." 
+            style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; outline: none;">
+    </div>
+
+    <div class="sort-box" style="flex: 1; min-width: 150px;">
+        <select id="sortSelect" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #ddd; background: white;">
+            <option value="newest">الأحدث أولاً</option>
+            <option value="oldest">الأقدم أولاً</option>
+            <option value="alphabetical">أبجدياً (أ-ي)</option>
+        </select>
+    </div>
+</section>
 <form id="recipeForm" class="hidden">
                 <input type="text" id="recipeName" placeholder="اسم الأكلة" required>
                 <input type="text" id="recipeImg" placeholder="رابط صورة الأكلة (URL)" required>
