@@ -1,102 +1,0 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>رمضان ماما - وصفاتك الرمضانية</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
-</head>
-<body>
-
-    <header>
-        <h1>🌙 رمضان ماما</h1>
-        <p>وصفاتكِ الشهية في مكان واحد</p>
-    </header>
-
-    <main>
-        <section class="recipe-form-section">
-            <button id="toggleFormBtn">إضافة وصفة جديدة +</button>
-           <section id="magicParserSection" class="magic-parser hidden" 
-    style="background: #fff9e6; padding: 20px; border-radius: 15px; margin: 15px 0; border: 2px dashed var(--accent-color); box-sizing: border-box;">
-    
-    <h3 style="margin-top:0; color: var(--primary-color); font-size: 1.1rem;">🤓 مساعد الإضافة الذكي</h3>
-    
-    <textarea id="magicPasteArea" 
-        placeholder="انسخ وصفة كاملة من أي مكان وألحقها هنا..." 
-        style="width: 100%; height: 120px; padding: 12px; border: 1px solid #ddd; border-radius: 10px; font-family: inherit; font-size: 14px; box-sizing: border-box; resize: vertical; outline: none; transition: border 0.3s;"></textarea>
-    
-    <button id="magicParseBtn" 
-        style="background: var(--primary-color); color: white; width: 100%; padding: 12px; border: none; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 10px; font-family: inherit;">
-        تحليل وتعبئة البيانات ✨
-    </button>
-</section>
-<section class="controls-section">
-    <div class="search-wrapper">
-        <input type="text" id="searchInput" placeholder="بحث عن أكلة أو مكون...">
-        <i class="search-icon">🔍</i>
-    </div>
-    <div class="sort-wrapper">
-        <select id="sortSelect">
-            <option value="newest">الأحدث</option>
-            <option value="oldest">الأقدم</option>
-            <option value="alphabetical">أبجدياً</option>
-        </select>
-    </div>
-</section>
-<form id="recipeForm" class="hidden">
-                <input type="text" id="recipeName" placeholder="اسم الأكلة" required>
-                <input type="text" id="recipeImg" placeholder="رابط صورة الأكلة (URL)" required>
-                <select id="recipeCategory">
-                    <option value="اكلة رئيسية">أكلة رئيسية</option>
-                    <option value="حلويات">حلويات</option>
-                    <option value="مقبلات">مقبلات</option>
-                    <option value="مشروبات">مشروبات</option>
-                </select>
-                <textarea id="recipeIngredients" placeholder="المكونات" required></textarea>
-                <textarea id="recipeMethod" placeholder="طريقة التحضير" required></textarea>
-                <button type="submit">حفظ الأكلة ✨</button>
-            </form>
-        </section>
-
-        <section class="filters">
-            <button onclick="filterRecipes('الكل')">الكل</button>
-            <button onclick="filterRecipes('اكلة رئيسية')">أطباق رئيسية</button>
-            <button onclick="filterRecipes('حلويات')">حلويات</button>
-            <button onclick="filterRecipes('مقبلات')">مقبلات</button>
-        </section>
-
-        <section id="recipeGrid" class="recipe-grid">
-            </section>
-    </main>
-
-    
-<div id="recipeModal" class="modal">
-    <div class="modal-content">
-        <span class="close-btn">&times;</span>
-        
-        <img id="modalImg" src="" alt="">
-        <h2 id="modalName"></h2>
-        
-        <div class="modal-body">
-            <h4>المكونات:</h4>
-            <p id="modalIngredients"></p>
-            <hr>
-            <h4>طريقة التحضير:</h4>
-            <p id="modalMethod"></p>
-        </div>
-
-        <div class="modal-footer">
-            <button id="editBtn" class="edit-btn">تعديل الوصفة ✏️</button>
-            <button id="deleteBtn" class="delete-btn">حذف الوصفة 🗑️</button>
-        </div>
-    </div>
-</div>
-<footer>
-    <button id="adminLoginBtn" style="background:none; border:none; color:#888; cursor:pointer; font-size:12px;">دخول الإدارة 🔐</button>
-    <button id="logoutBtn" class="hidden" style="background:none; border:none; color:red; cursor:pointer; font-size:12px;">تسجيل خروج</button>
-</footer>
-<script src="script.js"></script>
-</body>
-</html>
