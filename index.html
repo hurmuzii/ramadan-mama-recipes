@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>رمضان ماما 🌙</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&family=Amiri:wght@700&display=swap"
+    rel="stylesheet">
+</head>
+
+<body>
+  <header>
+    <h1>رمضان ماما 🌙✨</h1>
+    <div class="controls">
+      <button id="auth-btn">تسجيل دخول</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="admin-only" id="admin-panel" style="display: none;">
+      <button id="add-recipe-btn"
+        style="background:var(--primary); color:white; border:none; padding:0.5rem 1rem; border-radius:8px; margin-bottom:1rem; cursor:pointer;">+
+        إضافة وصفة جديدة</button>
+      <!-- Add/Edit Form will be dynamic or inside modal -->
+    </section>
+
+    <section class="search-bar">
+      <input type="text" id="search-input" placeholder="ابحث عن أكلة أو مكون..." />
+      <select id="sort-select">
+        <option value="newest">الأحدث</option>
+        <option value="oldest">الأقدم</option>
+        <option value="a-z">أبجدي</option>
+      </select>
+      <select id="category-filter">
+        <option value="all">كل الأصناف</option>
+        <option value="main">أطباق رئيسية</option>
+        <option value="sweets">حلويات</option>
+        <option value="snacks">مقبلات</option>
+        <option value="drinks">مشروبات</option>
+      </select>
+    </section>
+
+    <div id="recipe-list" class="recipe-grid">
+      <!-- Recipes will be injected here -->
+    </div>
+  </main>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modal">
+    <div class="modal-content">
+      <button class="close-modal" id="close-modal">&times;</button>
+      <div class="modal-body" id="modal-body">
+        <!-- Dynamic Content -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Recipe Modal (Initial Hidden Structure) -->
+  <div class="modal-overlay" id="add-modal">
+    <div class="modal-content">
+      <button class="close-modal" id="close-add-modal">&times;</button>
+      <h2>إضافة وصفة جديدة</h2>
+      <form id="recipe-form">
+        <textarea id="magic-paste" placeholder="✨ الصق النص هنا ليتم تحليله تلقائياً... (أو اكتب يدوياً)"></textarea>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <input type="text" id="recipe-name" placeholder="اسم الأكلة" required style="padding:0.5rem;" />
+          <select id="recipe-category">
+            <option value="main">أطباق رئيسية</option>
+            <option value="sweets">حلويات</option>
+            <option value="snacks">مقبلات</option>
+            <option value="drinks">مشروبات</option>
+          </select>
+        </div>
+
+        <input type="text" id="recipe-image" placeholder="رابط الصورة (اختياري)"
+          style="width:100%; margin-top:1rem; padding:0.5rem;" />
+        <input type="text" id="recipe-video" placeholder="رابط الفيديو (اختياري - TikTok/Insta)"
+          style="width:100%; margin-top:1rem; padding:0.5rem;" />
+
+        <textarea id="recipe-ingredients" placeholder="المكونات (كل مكون في سطر)"
+          style="min-height:100px; margin-top:1rem;"></textarea>
+        <textarea id="recipe-method" placeholder="طريقة التحضير" style="min-height:100px; margin-top:1rem;"></textarea>
+
+        <button type="submit"
+          style="background:var(--primary); color:white; border:none; padding:1rem; width:100%; border-radius:8px; margin-top:1rem; font-weight:bold; cursor:pointer;">حفظ
+          الوصفة</button>
+      </form>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>
