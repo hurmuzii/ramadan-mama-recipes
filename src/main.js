@@ -130,11 +130,19 @@ function setupEventListeners(session) {
 
   // Magic Parser
   const magicArea = document.getElementById('magic-paste');
-  magicArea.addEventListener('paste', (e) => {
-    setTimeout(async () => {
-      const text = magicArea.value;
-      const parsed = await magicParser(text);
 
+  async function runMagicParser() {
+    const text = magicArea.value.trim();
+    if (!text) {
+      alert('الرجاء لصق النص أولاً!');
+      return;
+    }
+    const btn = document.getElementById('magic-parse-btn');
+    btn.textContent = '⏳ جاري التحليل...';
+    btn.disabled = true;
+
+    try {
+      const parsed = await magicParser(text);
       if (parsed) {
         if (parsed.name) document.getElementById('recipe-name').value = parsed.name;
         if (parsed.category) document.getElementById('recipe-category').value = parsed.category;
@@ -142,10 +150,22 @@ function setupEventListeners(session) {
         if (parsed.method) document.getElementById('recipe-method').value = parsed.method;
         if (parsed.video_url) document.getElementById('recipe-video').value = parsed.video_url;
         if (parsed.image_url) document.getElementById('recipe-image').value = parsed.image_url;
-
         alert('تم التحليل بنجاح! ⚡ راجعي البيانات ثم اضغطي حفظ.');
+      } else {
+        alert('لم يتم التعرف على النص. تأكدي من صيغة الوصفة.');
       }
-    }, 200);
+    } finally {
+      btn.textContent = '✨ تحليل النص تلقائياً';
+      btn.disabled = false;
+    }
+  }
+
+  // Trigger on button click
+  document.getElementById('magic-parse-btn').addEventListener('click', runMagicParser);
+
+  // Also trigger automatically on paste (convenience)
+  magicArea.addEventListener('paste', () => {
+    setTimeout(runMagicParser, 300);
   });
 
   // Form Submit

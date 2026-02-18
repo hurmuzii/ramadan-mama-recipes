@@ -65,7 +65,8 @@
       <button class="close-modal" id="close-add-modal">&times;</button>
       <h2>إضافة وصفة جديدة</h2>
       <form id="recipe-form">
-        <textarea id="magic-paste" placeholder="✨ الصق النص هنا ليتم تحليله تلقائياً... (أو اكتب يدوياً)"></textarea>
+        <textarea id="magic-paste" placeholder="✨ الصق النص هنا ثم اضغطي زر التحليل..."></textarea>
+        <button type="button" id="magic-parse-btn" style="background:var(--primary); color:white; border:none; padding:0.6rem 1.2rem; border-radius:8px; margin-top:0.5rem; cursor:pointer; font-size:0.95rem; width:100%;">✨ تحليل النص تلقائياً</button>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
           <input type="text" id="recipe-name" placeholder="اسم الأكلة" required style="padding:0.5rem;" />
