@@ -1,10 +1,15 @@
 export const ui = {
+    showLoading: () => {
+        const container = document.getElementById('recipe-list');
+        container.innerHTML = '<div class="loading-spinner"></div>';
+    },
+
     renderRecipes: (recipes, isAdmin = false) => {
         const container = document.getElementById('recipe-list');
         container.innerHTML = '';
 
         if (!recipes || recipes.length === 0) {
-            container.innerHTML = '<p style="text-align:center; width:100%;">لا توجد وصفات حالياً...</p>';
+            container.innerHTML = '<p style="text-align:center; width:100%; color:#888; margin-top:3rem;">لا توجد وصفات حالياً...</p>';
             return;
         }
 
@@ -12,28 +17,24 @@ export const ui = {
             const card = document.createElement('div');
             card.className = 'recipe-card';
 
-            // We need to attach listeners *after* modal opens?
-            // The modal opening clears html and adds new buttons.
-            // So we can return buttons IDs from openRecipeModal.
-            // We need to pass a callback to `onclick` that handles the logic.
-
             card.onclick = () => {
                 const ids = ui.openRecipeModal(recipe, isAdmin);
                 if (ids && isAdmin) {
-                    // Dispatch a custom event or call a global function?
-                    // Simplest for this setup: Custom Event on document
                     const event = new CustomEvent('recipe-modal-opened', { detail: { ...ids, recipe } });
                     document.dispatchEvent(event);
                 }
             };
 
-            // Default Image if none
-            const imgUrl = recipe.image_url || 'https://via.placeholder.com/300?text=Delicious+Food';
-
             const categoryName = getCategoryName(recipe.category);
 
+            // Image: use img tag with onerror fallback to CSS placeholder
+            const imgHtml = recipe.image_url
+                ? `<img src="${recipe.image_url}" alt="${recipe.name}" class="recipe-image" loading="lazy"
+                     onerror="this.outerHTML='<div class=\\'recipe-image-placeholder\\'>🍽️</div>'">`
+                : `<div class="recipe-image-placeholder">🍽️</div>`;
+
             card.innerHTML = `
-        <img src="${imgUrl}" alt="${recipe.name}" class="recipe-image" loading="lazy">
+        ${imgHtml}
         <div class="recipe-content">
           <span class="recipe-category">${categoryName}</span>
           <h3 class="recipe-title">${recipe.name}</h3>
@@ -51,12 +52,17 @@ export const ui = {
         const modalBody = document.getElementById('modal-body');
         const categoryName = getCategoryName(recipe.category);
 
-        // Format text
         const ingredientsHtml = formatText(recipe.ingredients);
         const methodHtml = formatText(recipe.method);
 
-        const videoBtn = recipe.video_url ?
-            `<a href="${recipe.video_url}" target="_blank" class="video-link-btn" style="display:block; margin: 1rem auto; text-align:center; max-width:200px;">📺 مشاهدة الفيديو</a>` : '';
+        const imgHtml = recipe.image_url
+            ? `<img src="${recipe.image_url}" alt="${recipe.name}" style="width:100%; max-height:300px; object-fit:cover; border-radius:12px; margin-bottom:1rem;"
+                 onerror="this.style.display='none'">`
+            : '';
+
+        const videoBtn = recipe.video_url
+            ? `<a href="${recipe.video_url}" target="_blank" class="video-link-btn" style="display:block; margin: 1rem auto; text-align:center; max-width:200px;">📺 مشاهدة الفيديو</a>`
+            : '';
 
         const adminControls = isAdmin ? `
             <div style="border-top:1px solid #eee; margin-top:2rem; padding-top:1rem; display:flex; gap:1rem; justify-content:center;">
@@ -66,15 +72,16 @@ export const ui = {
         ` : '';
 
         modalBody.innerHTML = `
+          ${imgHtml}
           <h2>${recipe.name}</h2>
           <span class="recipe-category">${categoryName}</span>
-          
+
           <h3>المكونات</h3>
-          <div style="line-height:1.6;">${ingredientsHtml}</div>
-          
+          <div style="line-height:1.8;">${ingredientsHtml}</div>
+
           <h3>طريقة التحضير</h3>
-          <div style="line-height:1.6;">${methodHtml}</div>
-          
+          <div style="line-height:1.8;">${methodHtml}</div>
+
           ${videoBtn}
           ${adminControls}
         `;
@@ -84,7 +91,6 @@ export const ui = {
         // Push history state so phone back button closes the modal
         history.pushState({ modal: true }, '');
 
-        // Return IDs so main.js can attach listeners
         return {
             editId: `edit-btn-${recipe.id}`,
             deleteId: `delete-btn-${recipe.id}`
@@ -103,35 +109,22 @@ export const ui = {
 // Helper: Convert newlines, boldify headings, and linkify URLs
 function formatText(text) {
     if (!text) return '';
-    // 0. Pre-clean literal <br> if user pasted them
     let clean = text.replace(/<br\s*\/?>/gi, '\n');
-
-    // 1. Escape HTML (but preserve potential standard chars if needed, though usually safe)
     let safe = clean.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
-    // 2. Linkify (Http/s links to <a>) BEFORE converting newlines so we don't break tags later? 
-    // Actually safe already escaped < >, so we are adding new tags now.
-    // Regex for URLs
     safe = safe.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" style="color:#007bff; text-decoration:underline;">$1</a>');
-
-    // 3. Newlines to <br>
     let withBreaks = safe.replace(/\n/g, '<br>');
-
-    // 4. Boldify "Something:" at start of line (or after <br>)
-    // Regex matches start of string ^ or <br> prefix
     let bolded = withBreaks.replace(/(^|<br>)([^<]+:)/g, '$1<strong>$2</strong>');
-
     return bolded;
 }
 
 function getCategoryName(val) {
     if (!val) return 'غير مصنف';
-    const key = val.toLowerCase().trim();
     const map = {
         'main': 'أطباق رئيسية',
         'sweets': 'حلويات',
         'snacks': 'مقبلات',
-        'drinks': 'مشروبات'
+        'drinks': 'مشروبات',
+        'soups': 'شوربات',
     };
-    return map[val] || val;
+    return map[val.toLowerCase().trim()] || val;
 }

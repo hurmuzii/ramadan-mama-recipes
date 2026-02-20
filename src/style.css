@@ -1,11 +1,8 @@
 :root {
   --primary: #5D377C;
-  /* Deep Ramadan Purple */
   --primary-hover: #4527A0;
   --accent: #FFD700;
-  /* Gold */
   --bg-color: #FDFBF7;
-  /* Warm Cream */
   --card-bg: rgba(255, 255, 255, 0.9);
   --text-main: #2D2D2D;
   --text-secondary: #5F6368;
@@ -117,7 +114,7 @@ main {
 }
 
 .search-bar input:focus {
-  box-shadow: 0 0 0 3px rgba(211, 84, 0, 0.2);
+  box-shadow: 0 0 0 3px rgba(93, 55, 124, 0.2);
   border-color: var(--primary);
 }
 
@@ -161,6 +158,17 @@ main {
   background-color: #eee;
 }
 
+/* CSS-based placeholder when image is missing or broken */
+.recipe-image-placeholder {
+  width: 100%;
+  height: 200px;
+  background: linear-gradient(135deg, #f5e6d3 0%, #e8d5b7 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+}
+
 .recipe-content {
   padding: 1.5rem;
   flex: 1;
@@ -200,7 +208,6 @@ main {
   height: 100%;
   background: rgba(0, 0, 0, 0.5);
   display: none;
-  /* Flex when active */
   justify-content: center;
   align-items: center;
   z-index: 1000;
@@ -223,12 +230,16 @@ main {
   position: absolute;
   top: 1rem;
   left: 1rem;
-  /* RTL */
   background: none;
   border: none;
   font-size: 2rem;
   cursor: pointer;
   color: var(--text-secondary);
+  transition: color 0.2s;
+}
+
+.close-modal:hover {
+  color: var(--text-main);
 }
 
 .modal-body h2 {
@@ -242,13 +253,52 @@ main {
   margin-top: 1.5rem;
 }
 
+/* Login Modal */
+.login-field {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.login-field:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(93, 55, 124, 0.15);
+}
+
+.login-submit-btn {
+  width: 100%;
+  padding: 0.85rem;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: bold;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.login-submit-btn:hover {
+  background: var(--primary-hover);
+}
+
+.login-submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* Admin Controls */
 .admin-only {
   display: none;
-  /* Shown via JS */
 }
 
-/* Linkify Button */
+/* Video Link Button */
 .video-link-btn {
   display: inline-block;
   background-color: #3498db;
@@ -271,8 +321,68 @@ textarea {
   padding: 1rem;
   border: 1px solid #ddd;
   border-radius: var(--border-radius);
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   font-family: inherit;
+  resize: vertical;
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  width: 52px;
+  height: 52px;
+  border: 5px solid #ede0f5;
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+  margin: 4rem auto;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Toast Notifications */
+#toast-container {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  align-items: center;
+  pointer-events: none;
+}
+
+.toast {
+  background: #2D2D2D;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 14px;
+  font-size: 0.95rem;
+  font-family: var(--font-family);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  animation: toastSlideUp 0.3s ease;
+  min-width: 220px;
+  text-align: center;
+}
+
+.toast-success { background: #27ae60; }
+.toast-error   { background: #e74c3c; }
+.toast-info    { background: #2980b9; }
+
+.toast-hide {
+  animation: toastFadeOut 0.4s ease forwards;
+}
+
+@keyframes toastSlideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes toastFadeOut {
+  to { opacity: 0; transform: translateY(-8px); }
 }
 
 /* Responsive */
