@@ -118,11 +118,24 @@ function setupEventListeners(session) {
   catFilter.addEventListener('change', filterAndSort);
 
   // Modal Events
-  document.getElementById('close-modal').onclick = ui.closeModal;
+  document.getElementById('close-modal').onclick = () => {
+    if (history.state?.modal) history.back();
+    else ui.closeModal();
+  };
   window.onclick = (e) => {
-    if (e.target.id === 'modal') ui.closeModal();
+    if (e.target.id === 'modal') {
+      if (history.state?.modal) history.back();
+      else ui.closeModal();
+    }
     if (e.target.id === 'add-modal') ui.toggleAddModal(false);
   };
+
+  // Handle phone back button: close modal instead of leaving site
+  window.addEventListener('popstate', (e) => {
+    if (document.getElementById('modal').style.display === 'flex') {
+      ui.closeModal();
+    }
+  });
 
   // Add Recipe Events
   document.getElementById('add-recipe-btn').onclick = () => ui.toggleAddModal(true);

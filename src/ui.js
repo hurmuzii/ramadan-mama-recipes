@@ -81,6 +81,9 @@ export const ui = {
 
         modal.style.display = 'flex';
 
+        // Push history state so phone back button closes the modal
+        history.pushState({ modal: true }, '');
+
         // Return IDs so main.js can attach listeners
         return {
             editId: `edit-btn-${recipe.id}`,
